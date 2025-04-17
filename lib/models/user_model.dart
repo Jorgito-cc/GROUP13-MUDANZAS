@@ -1,4 +1,4 @@
-class UserModel {
+/* class UserModel {
   final String username;
   final String role;
   final String token;
@@ -13,3 +13,4 @@ class UserModel {
     );
   }
 }
+ */
