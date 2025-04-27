@@ -19,6 +19,16 @@ import '../screens/customer/servicio_local_screen.dart';
 import '../screens/customer/servicio_nacional_screen.dart';
 import '../screens/customer/contacto_screen.dart';
 
+
+
+
+
+
+import 'screens/customer/catalogo_screen.dart';
+import 'screens/customer/vehicle_info_screen.dart';
+import 'screens/customer/solicitar_servicio_screen.dart';
+import 'screens/customer/payment_screen.dart';
+
 void main() {
   runApp(MultiProvider(
     providers: [
@@ -44,11 +54,16 @@ class MudanzasGoApp extends StatelessWidget {
             '/admin': (context) => AdminDashboardScreen(),
             '/employee': (context) => EmployeePanelScreen(),
             '/chofer': (context) => ChoferPanelScreen(),
-             '/perfil': (context) => ProfileScreen(),
-  '/servicio-local': (context) => ServicioLocalScreen(),
-  '/servicio-nacional': (context) => ServicioNacionalScreen(),
-'/contacto': (_) => ContactoScreen(),
+            '/perfil': (context) => ProfileScreen(),
+            '/servicio-local': (context) => ServicioLocalScreen(),
+            '/servicio-nacional': (context) => ServicioNacionalScreen(),
+            '/contacto': (_) => ContactoScreen(),
 
+            // 👇 Añade las rutas que faltaban:
+            '/catalogo': (_) => CatalogoScreen(),
+            '/detalle-vehiculo': (_) => VehicleInfoScreen(),
+            '/solicitar-servicio': (_) => SolicitarServicioScreen(),
+            '/payment': (_) => PaymentScreen(),
           },
         );
       },

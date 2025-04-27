@@ -38,6 +38,8 @@ dependencies:
   get: ^4.7.2
   provider: ^6.1.4
   shared_preferences: ^2.5.3
+  smooth_page_indicator: ^1.2.1
+  google_maps_flutter: ^2.12.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -62,8 +64,16 @@ flutter:
     - assets/lamp.jpeg
     - assets/chair.jpeg
     - assets/coco.png
-
-
+    - assets/cerrada1.png
+    - assets/cerrada2.png
+    - assets/tomelada1.png
+    - assets/tonelada81.png
+    - assets/tonelada82.png
+    - assets/torton1.png
+    - assets/torton2.png
+    - assets/traile1.png
+    - assets/trailer2.png
+    - assets/vehiculosdisponibles.jpg
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

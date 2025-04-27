@@ -6,94 +6,84 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthProvider>(context);
-    final nombreController = TextEditingController(text: auth.nombre);
-    final emailController = TextEditingController(text: auth.token); // 👈 Si tienes email, puedes mostrarlo si lo guardas
-    final fechaNacimientoController = TextEditingController(); // Aquí iría si tienes el campo
-    final telefonoController = TextEditingController(); // Aquí también
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Mi Perfil"),
+        title: const Text("Mi Perfil"),
         backgroundColor: Colors.cyan[800],
+        centerTitle: true,
       ),
-      body: Stack(
-        children: [
-          SizedBox.expand(
-            child: Image.asset('assets/coco.png', fit: BoxFit.cover),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.white, Color(0xFFE0F7FA)], // fondo claro-profesional
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-          Container(color: Colors.black.withOpacity(0.5)),
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
-                Text(
-                  'Información del Cliente',
-                  style: TextStyle(fontSize: 26, color: Colors.white),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
+              CircleAvatar(
+                radius: 55,
+                backgroundColor: Colors.cyan,
+                child: Icon(Icons.person, size: 70, color: Colors.white),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Información del Cliente',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.cyan[800],
                 ),
-                SizedBox(height: 30),
-                TextFormField(
-                  controller: nombreController,
-                  enabled: false,
-                  style: TextStyle(color: Colors.white),
-                  decoration: _buildInputDecoration("Nombre"),
-                ),
-                SizedBox(height: 16),
-                TextFormField(
-                  controller: emailController,
-                  enabled: false,
-                  style: TextStyle(color: Colors.white),
-                  decoration: _buildInputDecoration("Correo"),
-                ),
-                SizedBox(height: 16),
-                TextFormField(
-                  controller: fechaNacimientoController,
-                  enabled: false,
-                  style: TextStyle(color: Colors.white),
-                  decoration: _buildInputDecoration("Fecha de Nacimiento"),
-                ),
-                SizedBox(height: 16),
-                TextFormField(
-                  controller: telefonoController,
-                  enabled: false,
-                  style: TextStyle(color: Colors.white),
-                  decoration: _buildInputDecoration("Teléfono"),
-                ),
-                SizedBox(height: 30),
-                ElevatedButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Funcionalidad en construcción')),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orangeAccent,
-                    padding: EdgeInsets.symmetric(vertical: 14, horizontal: 30),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
+              ),
+              const SizedBox(height: 30),
+              _buildInfoCard('Nombre', auth.nombre ?? "No disponible"),
+              const SizedBox(height: 16),
+              _buildInfoCard('Correo', auth.token ?? "No disponible"), 
+              const SizedBox(height: 16),
+              _buildInfoCard('Fecha de Nacimiento', 'No disponible'),
+              const SizedBox(height: 16),
+              _buildInfoCard('Teléfono', 'No disponible'),
+              const SizedBox(height: 30),
+              ElevatedButton.icon(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Funcionalidad en construcción')),
+                  );
+                },
+                icon: const Icon(Icons.edit),
+                label: const Text("Editar Perfil"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orangeAccent,
+                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Text(
-                    "Editar Perfil",
-                    style: TextStyle(fontSize: 18),
-                  ),
-                )
-              ],
-            ),
+                  textStyle: const TextStyle(fontSize: 18),
+                ),
+              )
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  InputDecoration _buildInputDecoration(String label) {
-    return InputDecoration(
-      labelText: label,
-      labelStyle: TextStyle(color: Colors.white),
-      filled: true,
-      fillColor: Colors.white24,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide.none,
+  Widget _buildInfoCard(String label, String value) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: ListTile(
+        leading: Icon(Icons.info_outline, color: Colors.cyan[800]),
+        title: Text(
+          label,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        subtitle: Text(value),
       ),
     );
   }
