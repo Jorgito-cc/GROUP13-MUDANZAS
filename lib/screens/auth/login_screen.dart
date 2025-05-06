@@ -18,12 +18,10 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Fondo
           SizedBox.expand(
             child: Image.asset('assets/coco.png', fit: BoxFit.cover),
           ),
           Container(color: Colors.black.withOpacity(0.6)),
-
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
@@ -51,16 +49,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       "Contraseña",
                       isPassword: true,
                     ),
-
                     const SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () async {
                         try {
-                          debugPrint("🟢 Login iniciado");
+                          debugPrint("🔐 Login iniciado...");
                           debugPrint("📧 Email: ${_emailController.text}");
                           debugPrint(
-                            "🔐 Password: ${_passwordController.text}",
+                            "🔑 Password: ${_passwordController.text}",
                           );
+
                           await authProvider.login(
                             _emailController.text,
                             _passwordController.text,

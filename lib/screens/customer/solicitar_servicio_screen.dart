@@ -33,7 +33,7 @@ class _SolicitarServicioScreenState extends State<SolicitarServicioScreen> {
               child: Column(
                 children: [
                   Text(
-                    vehicle["name"],
+                     vehicle["nombre"], // ✅ Esto es correcto
                     style: TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),

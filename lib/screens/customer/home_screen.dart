@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../../providers/auth_provider.dart';
-import '../../data/vehicle_data.dart';
+import '../../data/vehiculo_info.dart'; // Asegúrate que este archivo existe
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -11,11 +11,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final List<PageController> _controllers = List.generate(
-    vehicles.length,
+    vehiclesveinfo.length,
     (index) => PageController(),
   );
 
-  String _categoriaSeleccionada = 'Todos'; // Filtro inicial
+  String _categoriaSeleccionada = 'Todos';
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +73,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildFiltroCategoria() {
     List<String> categorias = ['Todos'];
-    categorias.addAll(vehicles.map((v) => v["categoria"].toString()).toSet());
+    categorias.addAll(
+        vehiclesveinfo.map((v) => v["tipo_vehiculo"]["nombre"].toString()).toSet());
 
     return DropdownButton<String>(
       value: _categoriaSeleccionada,
@@ -96,8 +97,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildCatalogoFiltrado(BuildContext context) {
     final vehiculosFiltrados = _categoriaSeleccionada == 'Todos'
-        ? vehicles
-        : vehicles.where((v) => v["categoria"] == _categoriaSeleccionada).toList();
+        ? vehiclesveinfo
+        : vehiclesveinfo.where((v) =>
+            v["tipo_vehiculo"]["nombre"] == _categoriaSeleccionada).toList();
 
     return ListView.builder(
       shrinkWrap: true,
@@ -105,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
       itemCount: vehiculosFiltrados.length,
       itemBuilder: (context, index) {
         final vehicle = vehiculosFiltrados[index];
-        final controllerIndex = vehicles.indexOf(vehicle);
+        final controllerIndex = vehiclesveinfo.indexOf(vehicle);
 
         return TweenAnimationBuilder(
           tween: Tween<double>(begin: 0, end: 1),
@@ -120,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           },
           child: Card(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withOpacity(0.85),
             elevation: 5,
             margin: EdgeInsets.symmetric(vertical: 10),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -130,12 +132,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   height: 180,
                   child: PageView.builder(
                     controller: _controllers[controllerIndex],
-                    itemCount: vehicle["images"].length,
+                    itemCount: vehicle["imagen"].length,
                     itemBuilder: (context, imgIndex) {
                       return ClipRRect(
                         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
                         child: Image.asset(
-                          vehicle["images"][imgIndex],
+                          vehicle["imagen"][imgIndex],
                           fit: BoxFit.cover,
                           width: double.infinity,
                         ),
@@ -146,7 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 SizedBox(height: 8),
                 SmoothPageIndicator(
                   controller: _controllers[controllerIndex],
-                  count: vehicle["images"].length,
+                  count: vehicle["imagen"].length,
                   effect: WormEffect(
                     dotColor: Colors.grey,
                     activeDotColor: Colors.orangeAccent,
@@ -157,35 +159,49 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     children: [
                       Text(
-                        vehicle["name"],
-                        style: TextStyle(color: Colors.black87, fontSize: 20, fontWeight: FontWeight.bold),
+                        vehicle["nombre"],
+                        style: TextStyle(
+                            color: Colors.black87,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold),
                       ),
                       Text(
-                        vehicle["type"],
+                        vehicle["tipo_vehiculo"]["nombre"],
                         style: TextStyle(color: Colors.black54, fontSize: 16),
                       ),
                       SizedBox(height: 8),
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: vehicle["available"] ? Colors.green : Colors.red,
+                          color: vehicle["estado"] == 1
+                              ? Colors.green
+                              : Colors.red,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
-                          vehicle["available"] ? "Disponible" : "No Disponible",
+                          vehicle["estado"] == 1
+                              ? "Disponible"
+                              : "No Disponible",
                           style: TextStyle(color: Colors.white),
                         ),
                       ),
                       SizedBox(height: 10),
                       ElevatedButton(
-                        onPressed: vehicle["available"]
-                            ? () => Navigator.pushNamed(context, '/detalle-vehiculo', arguments: vehicle)
+                        onPressed: vehicle["estado"] == 1
+                            ? () => Navigator.pushNamed(
+                                  context,
+                                  '/detalle-vehiculo',
+                                  arguments: vehicle,
+                                )
                             : null,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.orangeAccent,
                           disabledBackgroundColor: Colors.grey,
-                          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 10),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
                         ),
                         child: Text('Solicitar'),
                       ),
@@ -197,35 +213,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildDrawer(BuildContext context, AuthProvider auth) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          DrawerHeader(
-            decoration: BoxDecoration(color: Colors.cyan[800]),
-            child: Text('Mudanzas Go!', style: TextStyle(fontSize: 24, color: Colors.white)),
-          ),
-          ListTile(
-            leading: Icon(Icons.location_city),
-            title: Text('Servicios Locales'),
-            onTap: () => Navigator.pushNamed(context, '/servicio-local'),
-          ),
-          ListTile(
-            leading: Icon(Icons.public),
-            title: Text('Servicios Nacionales'),
-            onTap: () => Navigator.pushNamed(context, '/servicio-nacional'),
-          ),
-          ListTile(
-            leading: Icon(Icons.local_shipping),
-            title: Text('Catálogo de Vehículos'),
-            onTap: () => Navigator.pushNamed(context, '/catalogo'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -247,13 +234,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 title: Text('¿Cerrar sesión?'),
                 content: Text('¿Estás seguro de que quieres cerrar sesión?'),
                 actions: [
-                  TextButton(onPressed: () => Navigator.pop(context), child: Text('No')),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text('Cancelar'),
+                  ),
                   TextButton(
                     onPressed: () {
                       Navigator.pop(context);
                       auth.logout(context);
                     },
-                    child: Text('Sí'),
+                    child: Text('Cerrar sesión'),
                   ),
                 ],
               ),
@@ -261,6 +251,36 @@ class _HomeScreenState extends State<HomeScreen> {
           },
         ),
       ],
+    );
+  }
+
+  Widget _buildDrawer(BuildContext context, AuthProvider auth) {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(color: Colors.cyan[800]),
+            child:
+                Text('Mudanzas Go!', style: TextStyle(fontSize: 24, color: Colors.white)),
+          ),
+          ListTile(
+            leading: Icon(Icons.location_city),
+            title: Text('Servicios Locales'),
+            onTap: () => Navigator.pushNamed(context, '/servicio-local'),
+          ),
+          ListTile(
+            leading: Icon(Icons.public),
+            title: Text('Servicios Nacionales'),
+            onTap: () => Navigator.pushNamed(context, '/servicio-nacional'),
+          ),
+          ListTile(
+            leading: Icon(Icons.local_shipping),
+            title: Text('Catálogo de Vehículos'),
+            onTap: () => Navigator.pushNamed(context, '/catalogo'),
+          ),
+        ],
+      ),
     );
   }
 }

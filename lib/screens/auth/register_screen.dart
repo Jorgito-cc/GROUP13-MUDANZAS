@@ -1,13 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 
-//asASas
-// dasdasdasd
 class RegisterScreen extends StatefulWidget {
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
@@ -34,11 +32,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final bytes = await File(image.path).readAsBytes();
     final base64Image = base64Encode(bytes);
 
+    debugPrint(
+      "📸 Imagen seleccionada desde ${fromCamera ? "Cámara" : "Galería"}",
+    );
+    debugPrint("🕗 Subiendo imagen a Imgur...");
+    debugPrint("📤 Base64 size: ${base64Image.length} bytes");
+
     final response = await http.post(
       Uri.parse('https://api.imgur.com/3/image'),
       headers: {'Authorization': 'Client-ID 4a3b1edaccd5a70'},
       body: {'image': base64Image},
     );
+
+    debugPrint("📥 Respuesta de Imgur: ${response.body}");
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -88,7 +94,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-
                     CircleAvatar(
                       radius: 50,
                       backgroundImage:
@@ -106,7 +111,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       backgroundColor: Colors.cyan,
                     ),
                     const SizedBox(height: 10),
-
                     ElevatedButton.icon(
                       icon: Icon(Icons.add_a_photo),
                       label: Text("Agregar Imagen"),
@@ -145,7 +149,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 ),
                           ),
                     ),
-
                     const SizedBox(height: 20),
                     _buildInput(_nameController, "Nombre"),
                     _buildInput(_emailController, "Correo"),
@@ -160,7 +163,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       _urlProfileController,
                       "Foto de Perfil (URL opcional)",
                     ),
-
                     const SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () async {
@@ -177,6 +179,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             );
                             return;
                           }
+
+                          debugPrint("🟢 Registro iniciado");
+                          debugPrint("📛 Nombre: ${_nameController.text}");
+                          debugPrint("📧 Email: ${_emailController.text}");
+                          debugPrint(
+                            "🔐 Password: ${_passwordController.text}",
+                          );
+                          debugPrint(
+                            "📍 Dirección: ${_direccionController.text}",
+                          );
+                          debugPrint(
+                            "📱 Teléfono: ${_telefonoController.text}",
+                          );
+                          debugPrint(
+                            "🖼️ URL imagen subida: ${_urlProfileController.text}",
+                          );
 
                           await authProvider.registerCliente(
                             context: context,
