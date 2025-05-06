@@ -1,3 +1,6 @@
+// =============================
+// 1. auth_provider.dart
+// =============================
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -19,7 +22,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> _loadFromPrefs() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
     _token = prefs.getString('token');
     _rol = prefs.getString('rol');
     _nombre = prefs.getString('nombre');
@@ -31,41 +34,97 @@ class AuthProvider extends ChangeNotifier {
     String password,
     BuildContext context,
   ) async {
-    final url = Uri.parse(
-      '${ApiService.baseUrl}/auth/login',
-    ); // Ruta actualizada
+    print('[LOGIN] Email ingresado: \$email');
+    print('[LOGIN] Password ingresado: \$password');
 
-    final res = await http.post(
+    final url = Uri.parse('${ApiService.baseUrl}/auth/login');
+    final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({"email": email, "password": password}),
     );
 
-    if (res.statusCode == 200) {
-      final data = jsonDecode(res.body);
-      _token = data['token'];
-      _rol = data['usuario']['rol']['nombre'];
-      _nombre = data['usuario']['nombre'];
+    print('[LOGIN] Código de respuesta: \${response.statusCode}');
+    print('[LOGIN] Respuesta JSON: \${response.body}');
 
-      SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      _token = data['token'];
+      _rol = data['user']['rol']['nombre'];
+      _nombre = data['user']['nombre'];
+
+      final prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', _token!);
       await prefs.setString('rol', _rol!);
       await prefs.setString('nombre', _nombre!);
 
-      notifyListeners();
+      print('[LOGIN] Token guardado: \$_token');
+      print('[LOGIN] Rol detectado: \$_rol');
+      print('[LOGIN] Usuario: \$_nombre');
 
+      notifyListeners();
       _redirectUserByRole(context);
     } else {
-      throw Exception('Error de login: ${res.body}');
+      throw Exception('Error al iniciar sesión: \${response.body}');
     }
+  }
+
+  Future<void> registerCliente({
+    required BuildContext context,
+    required String nombre,
+    required String email,
+    required String password,
+    required String telefono,
+    required String direccion,
+    String? profileIcon,
+  }) async {
+    print(
+      '[REGISTRO] Datos enviados:\nNombre: \$nombre\nEmail: \$email\nPassword: \$password\nTeléfono: \$telefono\nDirección: \$direccion\nURL Imagen: \$profileIcon',
+    );
+
+    final url = Uri.parse('${ApiService.baseUrl}/auth/register');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        "nombre": nombre,
+        "email": email,
+        "password": password,
+        "telefono": telefono,
+        "direccion": direccion,
+        "profile_icon": profileIcon,
+      }),
+    );
+
+    print('[REGISTRO] Código de respuesta: \${response.statusCode}');
+    print('[REGISTRO] Respuesta JSON: \${response.body}');
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Registro exitoso. Inicia sesión.")),
+      );
+      Navigator.pop(context);
+    } else {
+      throw Exception('Error al registrar: \${response.body}');
+    }
+  }
+
+  Future<void> logout(BuildContext context) async {
+    _token = null;
+    _rol = null;
+    _nombre = null;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    notifyListeners();
+    Navigator.pushReplacementNamed(context, '/login');
   }
 
   void _redirectUserByRole(BuildContext context) {
     switch (_rol) {
-      case 'ADMIN':
+      case 'ADMINISTRADOR':
         Navigator.pushReplacementNamed(context, '/admin');
         break;
-      case 'EMPLEADO':
+      case 'AYUDANTE':
         Navigator.pushReplacementNamed(context, '/employee');
         break;
       case 'CHOFER':
@@ -77,71 +136,4 @@ class AuthProvider extends ChangeNotifier {
         break;
     }
   }
-
-  //REGISTAR CLIENTE
-  Future<void> registerCliente({
-    required BuildContext context,
-    required String nombre,
-    required String email,
-    required String password,
-    required String fechaNacimiento,
-    required String telefono,
-    String? urlProfile,
-  }) async {
-    final url = Uri.parse('${ApiService.baseUrl}/cliente/registrar');
-
-    final res = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        "nombre": nombre,
-        "email": email,
-        "password": password,
-        "fecha_nacimiento": fechaNacimiento,
-        "telefono": telefono,
-        "url_profile": urlProfile,
-      }),
-    );
-
-    if (res.statusCode == 200 || res.statusCode == 201) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Registro exitoso. Inicia sesión.")),
-      );
-      Navigator.pop(context);
-    } else {
-      throw Exception('Error al registrar: ${res.body}');
-    }
-  }
-
-  Future<void> logout(BuildContext context) async {
-    _token = null;
-    _rol = null;
-    _nombre = null;
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-    notifyListeners();
-    Navigator.pushReplacementNamed(context, '/login');
-  }
 }
-
-
-
-// Es para registar admin 
-
-/* Future<void> register(String nombre, String email, String password, BuildContext context) async {
-  final url = Uri.parse('${ApiService.baseUrl}/auth/register');  // Ruta actualizada
-  final res = await http.post(url,
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({"nombre": nombre, "email": email, "password": password}),
-
-  );
-
-  if (res.statusCode == 200 || res.statusCode == 201) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text("Registro exitoso. Inicia sesión.")));
-    Navigator.pop(context);
-  } else {
-    throw Exception('Error al registrar: ${res.body}');
-  }
-}
- */

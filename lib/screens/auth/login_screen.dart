@@ -18,17 +18,12 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Imagen de fondo
+          // Fondo
           SizedBox.expand(
-            child: Image.asset(
-              'assets/coco.png', // Asegúrate de tener esta imagen
-              fit: BoxFit.cover,
-            ),
+            child: Image.asset('assets/coco.png', fit: BoxFit.cover),
           ),
-          // Fondo con opacidad
           Container(color: Colors.black.withOpacity(0.6)),
 
-          // Contenido principal
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
@@ -50,40 +45,56 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-
                     _buildInput(_emailController, "Correo"),
-                    _buildInput(_passwordController, "Contraseña", isPassword: true),
+                    _buildInput(
+                      _passwordController,
+                      "Contraseña",
+                      isPassword: true,
+                    ),
 
                     const SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () async {
                         try {
+                          debugPrint("🟢 Login iniciado");
+                          debugPrint("📧 Email: ${_emailController.text}");
+                          debugPrint(
+                            "🔐 Password: ${_passwordController.text}",
+                          );
                           await authProvider.login(
                             _emailController.text,
                             _passwordController.text,
                             context,
                           );
                         } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(e.toString())),
-                          );
+                          debugPrint("❌ Error de login: $e");
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text(e.toString())));
                         }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orangeAccent,
-                        padding: EdgeInsets.symmetric(vertical: 14, horizontal: 30),
+                        padding: EdgeInsets.symmetric(
+                          vertical: 14,
+                          horizontal: 30,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
                       child: Text(
                         "Ingresar",
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 10),
                     TextButton(
-                      onPressed: () => Navigator.pushNamed(context, '/register'),
+                      onPressed:
+                          () => Navigator.pushNamed(context, '/register'),
                       child: Text("¿No tienes cuenta? Regístrate"),
                     ),
                   ],
@@ -96,8 +107,11 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildInput(TextEditingController controller, String label,
-      {bool isPassword = false}) {
+  Widget _buildInput(
+    TextEditingController controller,
+    String label, {
+    bool isPassword = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: TextField(

@@ -1,3 +1,4 @@
 class ApiService {
-  static const String baseUrl = 'https://backend-tms-qh89.onrender.com/api';
+  static const String baseUrl =
+      'https://backendsi2mudanza-production.up.railway.app/api';
 }
