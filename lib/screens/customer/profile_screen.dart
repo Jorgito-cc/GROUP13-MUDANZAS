@@ -16,7 +16,7 @@ class ProfileScreen extends StatelessWidget {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.white, Color(0xFFE0F7FA)], // fondo claro-profesional
+            colors: [Colors.white, Color(0xFFE0F7FA)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -29,7 +29,14 @@ class ProfileScreen extends StatelessWidget {
               CircleAvatar(
                 radius: 55,
                 backgroundColor: Colors.cyan,
-                child: Icon(Icons.person, size: 70, color: Colors.white),
+                backgroundImage:
+                    auth.profileIcon != null
+                        ? NetworkImage(auth.profileIcon!)
+                        : null,
+                child:
+                    auth.profileIcon == null
+                        ? Icon(Icons.person, size: 70, color: Colors.white)
+                        : null,
               ),
               const SizedBox(height: 20),
               Text(
@@ -43,29 +50,36 @@ class ProfileScreen extends StatelessWidget {
               const SizedBox(height: 30),
               _buildInfoCard('Nombre', auth.nombre ?? "No disponible"),
               const SizedBox(height: 16),
-              _buildInfoCard('Correo', auth.token ?? "No disponible"), 
+              _buildInfoCard('Correo', auth.email ?? "No disponible"),
               const SizedBox(height: 16),
-              _buildInfoCard('Fecha de Nacimiento', 'No disponible'),
+              _buildInfoCard('Teléfono', auth.telefono ?? "No disponible"),
               const SizedBox(height: 16),
-              _buildInfoCard('Teléfono', 'No disponible'),
+              _buildInfoCard('Dirección', auth.direccion ?? "No disponible"),
               const SizedBox(height: 30),
               ElevatedButton.icon(
                 onPressed: () {
+                  // Aquí podrás abrir una pantalla para editar el perfil
+                  //añadirrrrrrr
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Funcionalidad en construcción')),
+                    const SnackBar(
+                      content: Text('Funcionalidad en construcción'),
+                    ),
                   );
                 },
                 icon: const Icon(Icons.edit),
                 label: const Text("Editar Perfil"),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orangeAccent,
-                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 30,
+                    vertical: 14,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
                   textStyle: const TextStyle(fontSize: 18),
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -79,10 +93,7 @@ class ProfileScreen extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: ListTile(
         leading: Icon(Icons.info_outline, color: Colors.cyan[800]),
-        title: Text(
-          label,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(value),
       ),
     );

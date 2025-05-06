@@ -1,6 +1,3 @@
-// =============================
-// 1. auth_provider.dart
-// =============================
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -11,10 +8,19 @@ class AuthProvider extends ChangeNotifier {
   String? _token;
   String? _rol;
   String? _nombre;
+  String? _email;
+  String? _telefono;
+  String? _direccion;
+  String? _profileIcon;
 
   String? get token => _token;
   String? get rol => _rol;
   String? get nombre => _nombre;
+  String? get email => _email;
+  String? get telefono => _telefono;
+  String? get direccion => _direccion;
+  String? get profileIcon => _profileIcon;
+
   bool get isAuthenticated => _token != null;
 
   AuthProvider() {
@@ -26,6 +32,10 @@ class AuthProvider extends ChangeNotifier {
     _token = prefs.getString('token');
     _rol = prefs.getString('rol');
     _nombre = prefs.getString('nombre');
+    _email = prefs.getString('email');
+    _telefono = prefs.getString('telefono');
+    _direccion = prefs.getString('direccion');
+    _profileIcon = prefs.getString('profile_icon');
     notifyListeners();
   }
 
@@ -34,8 +44,8 @@ class AuthProvider extends ChangeNotifier {
     String password,
     BuildContext context,
   ) async {
-    print('[LOGIN] Email ingresado: \$email');
-    print('[LOGIN] Password ingresado: \$password');
+    debugPrint('[LOGIN] Email ingresado: $email');
+    debugPrint('[LOGIN] Password ingresado: $password');
 
     final url = Uri.parse('${ApiService.baseUrl}/auth/login');
     final response = await http.post(
@@ -44,28 +54,41 @@ class AuthProvider extends ChangeNotifier {
       body: jsonEncode({"email": email, "password": password}),
     );
 
-    print('[LOGIN] Código de respuesta: \${response.statusCode}');
-    print('[LOGIN] Respuesta JSON: \${response.body}');
+    debugPrint('[LOGIN] Código de respuesta: ${response.statusCode}');
+    debugPrint('[LOGIN] Respuesta JSON: ${response.body}');
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
+
+      final user = data['user'];
       _token = data['token'];
-      _rol = data['user']['rol']['nombre'];
-      _nombre = data['user']['nombre'];
+      _rol = user['rol']['nombre'];
+      _nombre = user['nombre'];
+      _email = user['email'];
+      _telefono = user['telefono'];
+      _direccion = user['direccion'];
+      _profileIcon = user['profile_icon'];
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', _token!);
       await prefs.setString('rol', _rol!);
-      await prefs.setString('nombre', _nombre!);
+      await prefs.setString('nombre', _nombre ?? '');
+      await prefs.setString('email', _email ?? '');
+      await prefs.setString('telefono', _telefono ?? '');
+      await prefs.setString('direccion', _direccion ?? '');
+      await prefs.setString('profile_icon', _profileIcon ?? '');
 
-      print('[LOGIN] Token guardado: \$_token');
-      print('[LOGIN] Rol detectado: \$_rol');
-      print('[LOGIN] Usuario: \$_nombre');
+      debugPrint('[LOGIN] Usuario autenticado correctamente');
+      debugPrint('Nombre: $_nombre');
+      debugPrint('Email: $_email');
+      debugPrint('Teléfono: $_telefono');
+      debugPrint('Dirección: $_direccion');
+      debugPrint('Imagen: $_profileIcon');
 
       notifyListeners();
       _redirectUserByRole(context);
     } else {
-      throw Exception('Error al iniciar sesión: \${response.body}');
+      throw Exception('Error al iniciar sesión: ${response.body}');
     }
   }
 
@@ -78,8 +101,14 @@ class AuthProvider extends ChangeNotifier {
     required String direccion,
     String? profileIcon,
   }) async {
-    print(
-      '[REGISTRO] Datos enviados:\nNombre: \$nombre\nEmail: \$email\nPassword: \$password\nTeléfono: \$telefono\nDirección: \$direccion\nURL Imagen: \$profileIcon',
+    debugPrint(
+      '[REGISTRO] Datos enviados:\n'
+      'Nombre: $nombre\n'
+      'Email: $email\n'
+      'Password: $password\n'
+      'Teléfono: $telefono\n'
+      'Dirección: $direccion\n'
+      'Imagen: $profileIcon',
     );
 
     final url = Uri.parse('${ApiService.baseUrl}/auth/register');
@@ -96,16 +125,16 @@ class AuthProvider extends ChangeNotifier {
       }),
     );
 
-    print('[REGISTRO] Código de respuesta: \${response.statusCode}');
-    print('[REGISTRO] Respuesta JSON: \${response.body}');
+    debugPrint('[REGISTRO] Código de respuesta: ${response.statusCode}');
+    debugPrint('[REGISTRO] Respuesta JSON: ${response.body}');
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Registro exitoso. Inicia sesión.")),
+        const SnackBar(content: Text("Registro exitoso. Inicia sesión.")),
       );
       Navigator.pop(context);
     } else {
-      throw Exception('Error al registrar: \${response.body}');
+      throw Exception('Error al registrar: ${response.body}');
     }
   }
 
@@ -113,9 +142,15 @@ class AuthProvider extends ChangeNotifier {
     _token = null;
     _rol = null;
     _nombre = null;
+    _email = null;
+    _telefono = null;
+    _direccion = null;
+    _profileIcon = null;
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     notifyListeners();
+
     Navigator.pushReplacementNamed(context, '/login');
   }
 
