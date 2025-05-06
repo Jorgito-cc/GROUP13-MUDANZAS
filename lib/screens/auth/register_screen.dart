@@ -1,14 +1,61 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 
-class RegisterScreen extends StatelessWidget {
+//asASas
+// dasdasdasd
+class RegisterScreen extends StatefulWidget {
+  @override
+  _RegisterScreenState createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _telefonoController = TextEditingController();
   final _direccionController = TextEditingController();
+  final _telefonoController = TextEditingController();
   final _urlProfileController = TextEditingController();
+
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImage({required bool fromCamera}) async {
+    final XFile? image = await _picker.pickImage(
+      source: fromCamera ? ImageSource.camera : ImageSource.gallery,
+      imageQuality: 85,
+    );
+
+    if (image == null) return;
+
+    final bytes = await File(image.path).readAsBytes();
+    final base64Image = base64Encode(bytes);
+
+    final response = await http.post(
+      Uri.parse('https://api.imgur.com/3/image'),
+      headers: {'Authorization': 'Client-ID 4a3b1edaccd5a70'},
+      body: {'image': base64Image},
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final imageUrl = data['data']['link'];
+      setState(() {
+        _urlProfileController.text = imageUrl;
+      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('✅ Imagen subida correctamente')));
+    } else {
+      print("❌ Error al subir imagen: ${response.body}");
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('❌ Error al subir imagen')));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +68,6 @@ class RegisterScreen extends StatelessWidget {
             child: Image.asset('assets/coco.png', fit: BoxFit.cover),
           ),
           Container(color: Colors.black.withOpacity(0.6)),
-
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
@@ -43,6 +89,64 @@ class RegisterScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
 
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundImage:
+                          _urlProfileController.text.isNotEmpty
+                              ? NetworkImage(_urlProfileController.text)
+                              : null,
+                      child:
+                          _urlProfileController.text.isEmpty
+                              ? Icon(
+                                Icons.person,
+                                size: 50,
+                                color: Colors.white,
+                              )
+                              : null,
+                      backgroundColor: Colors.cyan,
+                    ),
+                    const SizedBox(height: 10),
+
+                    ElevatedButton.icon(
+                      icon: Icon(Icons.add_a_photo),
+                      label: Text("Agregar Imagen"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueGrey,
+                      ),
+                      onPressed:
+                          () => showModalBottomSheet(
+                            context: context,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(20),
+                              ),
+                            ),
+                            builder:
+                                (context) => Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    ListTile(
+                                      leading: Icon(Icons.camera_alt),
+                                      title: Text('Tomar foto'),
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                        _pickImage(fromCamera: true);
+                                      },
+                                    ),
+                                    ListTile(
+                                      leading: Icon(Icons.photo_library),
+                                      title: Text('Elegir de galería'),
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                        _pickImage(fromCamera: false);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                          ),
+                    ),
+
+                    const SizedBox(height: 20),
                     _buildInput(_nameController, "Nombre"),
                     _buildInput(_emailController, "Correo"),
                     _buildInput(
@@ -50,8 +154,8 @@ class RegisterScreen extends StatelessWidget {
                       "Contraseña",
                       isPassword: true,
                     ),
-                    _buildInput(_telefonoController, "Teléfono"),
                     _buildInput(_direccionController, "Dirección"),
+                    _buildInput(_telefonoController, "Teléfono"),
                     _buildInput(
                       _urlProfileController,
                       "Foto de Perfil (URL opcional)",
@@ -61,7 +165,6 @@ class RegisterScreen extends StatelessWidget {
                     ElevatedButton(
                       onPressed: () async {
                         try {
-                          // Validación
                           if (_nameController.text.isEmpty ||
                               _emailController.text.isEmpty ||
                               _passwordController.text.isEmpty ||
@@ -69,41 +172,22 @@ class RegisterScreen extends StatelessWidget {
                               _direccionController.text.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(
-                                  "Por favor, llena todos los campos obligatorios.",
-                                ),
+                                content: Text("Completa todos los campos."),
                               ),
                             );
                             return;
                           }
-
-                          debugPrint("🟢 Registro iniciado");
-                          debugPrint("📛 Nombre: ${_nameController.text}");
-                          debugPrint("📧 Email: ${_emailController.text}");
-                          debugPrint(
-                            "🔐 Password: ${_passwordController.text}",
-                          );
-                          debugPrint(
-                            "📱 Teléfono: ${_telefonoController.text}",
-                          );
-                          debugPrint(
-                            "📍 Dirección: ${_direccionController.text}",
-                          );
-                          debugPrint(
-                            "🖼️ Imagen (opcional): ${_urlProfileController.text}",
-                          );
 
                           await authProvider.registerCliente(
                             context: context,
                             nombre: _nameController.text,
                             email: _emailController.text,
                             password: _passwordController.text,
-                            telefono: _telefonoController.text,
                             direccion: _direccionController.text,
+                            telefono: _telefonoController.text,
                             profileIcon: _urlProfileController.text,
                           );
                         } catch (e) {
-                          debugPrint("❌ Error de registro: $e");
                           ScaffoldMessenger.of(
                             context,
                           ).showSnackBar(SnackBar(content: Text(e.toString())));
