@@ -21,7 +21,7 @@ import '../screens/customer/contacto_screen.dart';
 
 
 
-
+import 'screens/customer/payment_screen.dart'; 
 
 
 import 'screens/customer/catalogo_screen.dart';

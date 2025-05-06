@@ -3,92 +3,85 @@ import 'package:flutter/material.dart';
 class PaymentScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // Recibimos los datos enviados desde SolicitarServicioScreen
-    final Map<String, dynamic> data = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-    final vehicle = data["vehicle"];
-    final origen = data["origen"];
-    final destino = data["destino"];
-    final fecha = data["fecha"];
-    final observaciones = data["observaciones"];
-
-    // Simulamos un precio base
-    final double precio = 500.0;
+    final Map<String, dynamic> datos = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final vehicle = datos["vehicle"];
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Resumen y Pago'),
+        title: Text("Resumen y Pago"),
+        backgroundColor: Colors.cyan[800],
       ),
-      body: Stack(
-        children: [
-          SizedBox.expand(
-            child: Image.asset('assets/coco.png', fit: BoxFit.cover),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.white, Colors.cyan.shade50],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-          Container(color: Colors.black.withOpacity(0.6)),
-          Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Resumen de Mudanza",
-                    style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 20),
-                  _buildInfo("Vehículo:", vehicle["name"]),
-                  _buildInfo("Origen:", origen),
-                  _buildInfo("Destino:", destino),
-                  _buildInfo("Fecha:", fecha),
-                  _buildInfo("Observaciones:", observaciones),
-                  SizedBox(height: 20),
-                  Divider(color: Colors.white24),
-                  SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("Total a Pagar:", style: TextStyle(color: Colors.white, fontSize: 20)),
-                      Text("\$${precio.toStringAsFixed(2)}", style: TextStyle(color: Colors.orangeAccent, fontSize: 22, fontWeight: FontWeight.bold)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              "Resumen del Servicio",
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.deepOrange),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 24),
+
+            _buildResumen("Vehículo", vehicle["nombre"]),
+            _buildResumen("Tipo", vehicle["tipo_vehiculo"]["nombre"]),
+            _buildResumen("Placa", vehicle["placa"]),
+            _buildResumen("Origen", datos["origen"]),
+            _buildResumen("Destino", datos["destino"]),
+            _buildResumen("Fecha", datos["fecha"]),
+            _buildResumen("Observaciones", datos["observaciones"] ?? "-"),
+            _buildResumen("Costo por Km", "Bs. ${vehicle["coste_kilometraje"]}"),
+
+            SizedBox(height: 30),
+
+            ElevatedButton.icon(
+              icon: Icon(Icons.check_circle_outline),
+              label: Text("Confirmar y Pagar"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orangeAccent,
+                padding: EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+              onPressed: () {
+                // Simular pago o continuar a una pasarela real
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: Text("¡Pago Realizado!"),
+                    content: Text("Tu solicitud ha sido registrada correctamente."),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false),
+                        child: Text("Volver al inicio"),
+                      )
                     ],
                   ),
-                  SizedBox(height: 30),
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Aquí puedes integrar Stripe, MercadoPago, etc.
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Pago realizado con éxito 🚚✅")),
-                        );
-                        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orangeAccent,
-                        padding: EdgeInsets.symmetric(horizontal: 40, vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      ),
-                      child: Text(
-                        "Pagar Ahora",
-                        style: TextStyle(fontSize: 18),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+                );
+              },
+            )
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildInfo(String title, String value) {
+  Widget _buildResumen(String titulo, String valor) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: TextStyle(color: Colors.white70)),
-          SizedBox(width: 8),
-          Expanded(child: Text(value, style: TextStyle(color: Colors.white))),
+          Text(titulo, style: TextStyle(color: Colors.black54)),
+          Expanded(
+            child: Text(valor, textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
         ],
       ),
     );
