@@ -15,7 +15,7 @@ class _SolicitarServicioScreenState extends State<SolicitarServicioScreen> {
   @override
   Widget build(BuildContext context) {
     final vehicle = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-
+/* este es cuando uno le da click ya en el boton de solicitar el boton de mudanzas , pertenece al formulario de solicitar mudanzads  */
     return Scaffold(
       appBar: AppBar(
         title: Text('Solicitar Mudanza'),

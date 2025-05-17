@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../widgets/auth_guard.dart';
+import '../../widgets/shared/auth_guard.dart';
 
 class ChoferPanelScreen extends StatelessWidget {
   @override

@@ -17,25 +17,28 @@ import '../screens/customer/catalogo_screen.dart';
 import '../screens/customer/vehicle_info_screen.dart';
 import '../screens/customer/solicitar_servicio_screen.dart';
 import '../screens/customer/payment_screen.dart';
+import '../widgets/customer/cotizacion_screen.dart';
 
 Map<String, WidgetBuilder> appRoutes = {
   '/login': (_) => LoginScreen(),
   '/register': (_) => RegisterScreen(),
   '/home': (_) => HomeScreen(),
   /* '/cart': (_) => CartScreen(), */
- /*  '/payment': (_) => PaymentScreen(), */
+  /*  '/payment': (_) => PaymentScreen(), */
   '/admin': (_) => AdminDashboardScreen(),
   '/employee': (_) => EmployeePanelScreen(),
   '/perfil': (_) => ProfileScreen(),
   '/servicio-local': (_) => ServicioLocalScreen(),
-'/servicio-nacional': (_) => ServicioNacionalScreen(),
- '/contacto': (_) => ContactoScreen(),
-  
+  '/servicio-nacional': (_) => ServicioNacionalScreen(),
+  '/contacto': (_) => ContactoScreen(),
 
-  
   '/catalogo': (_) => CatalogoScreen(),
   '/detalle-vehiculo': (_) => VehicleInfoScreen(),
   '/solicitar-servicio': (_) => SolicitarServicioScreen(),
   '/payment': (_) => PaymentScreen(),
   /* '/manage-products': (_) => ManageProductsScreen(), */
+
+// este es para solicitar un servicio personalizado 
+  '/cotizacion-servicio' :(_)=> CotizacionScreen()
+
 };
