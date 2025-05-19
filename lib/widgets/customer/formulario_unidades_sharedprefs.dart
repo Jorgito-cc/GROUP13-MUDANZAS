@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -121,12 +120,13 @@ class _FormularioUnidadesScreenState extends State<FormularioUnidadesScreen> {
                                     _irPagina(index + 1);
                                   } else {
                                     await _guardarDatos();
-                                    Navigator.pop(context);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                          content: Text(
-                                              "✅ Medidas guardadas correctamente")),
-                                    );
+                                    Navigator.pushReplacementNamed(
+                                        context, '/catalogo-vehiculos');
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(SnackBar(
+                                      content: Text(
+                                          "✅ Medidas guardadas correctamente"),
+                                    ));
                                   }
                                 }
                               },

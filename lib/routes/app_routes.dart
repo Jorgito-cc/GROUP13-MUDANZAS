@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tienda_ecommerce/screens/customer/vehiculo_catalogo_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
 import '../screens/customer/home_screen.dart';
@@ -43,7 +44,8 @@ Map<String, WidgetBuilder> appRoutes = {
 // este es para solicitar un servicio personalizado 
   '/cotizacion-servicio' :(_)=> CotizacionScreen(),
 
-  '/rellenar-cotizacion':(_)=> RellenarCotizacionScreen()
+  '/rellenar-cotizacion':(_)=> RellenarCotizacionScreen(),
+'/catalogo-vehiculos': (_) => VehiculoCatalogoScreen()
 
 
 };
