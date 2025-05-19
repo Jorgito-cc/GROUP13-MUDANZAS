@@ -19,6 +19,8 @@ import '../screens/customer/solicitar_servicio_screen.dart';
 import '../screens/customer/payment_screen.dart';
 import '../widgets/customer/cotizacion_screen.dart';
 
+import '../widgets/customer/rellenar_cotizacion_screen.dart';
+
 Map<String, WidgetBuilder> appRoutes = {
   '/login': (_) => LoginScreen(),
   '/register': (_) => RegisterScreen(),
@@ -39,6 +41,9 @@ Map<String, WidgetBuilder> appRoutes = {
   /* '/manage-products': (_) => ManageProductsScreen(), */
 
 // este es para solicitar un servicio personalizado 
-  '/cotizacion-servicio' :(_)=> CotizacionScreen()
+  '/cotizacion-servicio' :(_)=> CotizacionScreen(),
+
+  '/rellenar-cotizacion':(_)=> RellenarCotizacionScreen()
+
 
 };

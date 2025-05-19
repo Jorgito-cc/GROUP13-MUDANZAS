@@ -277,7 +277,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ListTile(
             leading: Icon(Icons.local_shipping),
             title: Text('Catálogo de Vehículos'),
-            onTap: () => Navigator.pushNamed(context, '/catalogo'),
+            onTap: () => Navigator.pushNamed(context, '/home'),
           ),
         ],
       ),

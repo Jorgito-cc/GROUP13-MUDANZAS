@@ -76,7 +76,7 @@ class VehicleInfoScreen extends StatelessWidget {
                       child: Text("Solicitar Mudanza", style: TextStyle(fontSize: 18)),
                     ),
                     const SizedBox(height: 10),
-                    ElevatedButton(
+                   /*  ElevatedButton(
                       onPressed: () {
                         Navigator.pushNamed(context, '/cotizacion-servicio', arguments: vehicle);
                       },
@@ -86,7 +86,7 @@ class VehicleInfoScreen extends StatelessWidget {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
                       child: Text("Solicitar Servicio", style: TextStyle(fontSize: 18)),
-                    ),
+                    ), */
                   ],
                 ),
               ),

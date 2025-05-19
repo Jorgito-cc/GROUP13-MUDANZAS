@@ -23,6 +23,8 @@ import 'screens/customer/solicitar_servicio_screen.dart';
 import 'screens/customer/payment_screen.dart';
 
 import './widgets/customer/cotizacion_screen.dart';
+import './widgets/customer/rellenar_cotizacion_screen.dart';
+
 
 void main() {
   runApp(
@@ -62,6 +64,7 @@ class MudanzasGoApp extends StatelessWidget {
             '/detalle-vehiculo': (_) => VehicleInfoScreen(),
             '/solicitar-servicio': (_) => SolicitarServicioScreen(),
             '/cotizacion-servicio':(_) =>CotizacionScreen (),
+            '/rellenar-cotizacion':(_)=>RellenarCotizacionScreen(),
             '/payment': (_) => PaymentScreen(),
           },
         );

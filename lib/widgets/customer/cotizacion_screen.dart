@@ -1,10 +1,33 @@
-
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
-class CotizacionScreen extends StatelessWidget {
+class CotizacionScreen extends StatefulWidget {
+  @override
+  _CotizacionScreenState createState() => _CotizacionScreenState();
+}
+
+class _CotizacionScreenState extends State<CotizacionScreen> {
   final String direccionOrigen = "La Plata, B1766 La Tablada, Provincia de B";
   final String direccionDestino =
       "Av. Buenos Aires, Gral. Deheza, Córdoba, Argentina";
+
+  DateTime? _selectedDate;
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime now = DateTime.now();
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: now,
+      lastDate: DateTime(now.year + 1),
+    );
+
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,13 +50,37 @@ class CotizacionScreen extends StatelessWidget {
                   ["Vivienda", "Comercio", "Edificio/Empresa"]),
               const SizedBox(height: 24),
 
-              // Direcciones
+              // Nueva sección: Fecha de reserva
+              Text(
+                "Fecha de Reserva",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              const SizedBox(height: 8),
+              GestureDetector(
+                onTap: () => _selectDate(context),
+                child: AbsorbPointer(
+                  child: TextFormField(
+                    readOnly: true,
+                    decoration: InputDecoration(
+                      hintText: _selectedDate == null
+                          ? 'Selecciona una fecha'
+                          : DateFormat('dd/MM/yyyy').format(_selectedDate!),
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 24),
               _buildInput("¿Dónde comienza tu mudanza?", direccionOrigen),
               const SizedBox(height: 16),
               _buildInput("¿Hacia dónde te mudamos?", direccionDestino),
               const SizedBox(height: 24),
 
-              // Mapa estático
               Center(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
@@ -46,7 +93,6 @@ class CotizacionScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // Distancia
               Center(
                 child: Text(
                   'Distancia: 622 km',
@@ -54,6 +100,35 @@ class CotizacionScreen extends StatelessWidget {
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Colors.deepOrange,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (_selectedDate == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Por favor selecciona una fecha de reserva'),
+                        ),
+                      );
+                      return;
+                    }
+
+                    Navigator.pushNamed(context, '/rellenar-cotizacion');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orangeAccent,
+                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: const Text(
+                    "Rellenar Formulario",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
