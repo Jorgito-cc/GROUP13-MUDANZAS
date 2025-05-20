@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class ResumenVehiculoScreen extends StatelessWidget {
   @override
@@ -76,7 +78,9 @@ class ResumenVehiculoScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     ElevatedButton.icon(
-                      onPressed: () {
+                      onPressed: () async {
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setString('vehiculo', jsonEncode(vehicle));
                         Navigator.pushNamed(context, '/detalle-compra');
                       },
                       icon: Icon(Icons.description),

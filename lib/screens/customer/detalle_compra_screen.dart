@@ -1,119 +1,169 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
-class DetalleCompraScreen extends StatelessWidget {
-  final Map<String, dynamic> compraEjemplo = {
-    "embalaje": true,
-    "tipo_viaje_id": 1,
-    "tipo_residencia_id": 2,
-    "origen": {
-      "latitud": 1232131.1,
-      "longitud": -242343.2,
-      "str": "El torno, calle X, Barrio Y, casa Z"
-    },
-    "destino": {
-      "latitud": -234234.1,
-      "longitud": -123211.2,
-      "str": "Cotoca, calle X, Barrio Y, casa Z"
-    },
-    "fecha_reserva": "2025-05-10 16:22:00",
-    "distancia": 312,
-    "vehiculo_id": 2,
-    "inmuebles": [
-      {
-        "id": 3,
-        "cantidad": 3,
-        "formularios": [
-          {"largo": 2, "ancho": 3, "alto": 1, "peso": 0.4},
-          {"largo": 3, "ancho": 5, "alto": 3, "peso": 1.4},
-          {"largo": 5, "ancho": 4, "alto": 6, "peso": 2.4},
-        ]
-      },
-      {
-        "id": 5,
-        "cantidad": 2,
-        "formularios": [
-          {"largo": 0.3, "ancho": 0.4, "alto": 0.5, "peso": 0.56},
-          {"largo": 0.45, "ancho": 0.85, "alto": 3, "peso": 0.99},
-        ]
+class DetalleCompraScreen extends StatefulWidget {
+  @override
+  State<DetalleCompraScreen> createState() => _DetalleCompraScreenState();
+}
+
+class _DetalleCompraScreenState extends State<DetalleCompraScreen> {
+  Map<String, dynamic>? datos;
+  bool cargando = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarDatos();
+  }
+
+  Future<void> _cargarDatos() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final embalaje = prefs.getBool('embalaje');
+    final tipoViaje = prefs.getString('tipo_viaje');
+    final residencia = prefs.getString('residencia');
+    final origen = prefs.getString('origen');
+    final destino = prefs.getString('destino');
+    final fechaReserva = prefs.getString('fecha_reserva');
+    final vehiculo = prefs.getString('vehiculo');
+    final mueblesJson = prefs.getString('muebles');
+
+    final claves = prefs.getKeys().where((k) => k.startsWith('medidas_')).toList();
+
+    List<Map<String, dynamic>> inmuebles = [];
+
+    for (var clave in claves) {
+      final id = clave.replaceFirst('medidas_', '');
+      final cantidad = prefs.getInt('cantidad_$id') ?? 0;
+      final data = prefs.getString(clave);
+      if (data != null) {
+        final formularios = jsonDecode(data);
+        inmuebles.add({
+          "id": id,
+          "cantidad": cantidad,
+          "formularios": formularios,
+        });
       }
-    ]
-  };
+    }
+
+    datos = {
+      "embalaje": embalaje ?? false,
+      "tipo_viaje": tipoViaje ?? "",
+      "residencia": residencia ?? "",
+      "origen": origen ?? "",
+      "destino": destino ?? "",
+      "fecha_reserva": fechaReserva ?? "",
+      "vehiculo": vehiculo != null ? jsonDecode(vehiculo) : {},
+      "muebles": mueblesJson != null ? jsonDecode(mueblesJson) : [],
+      "inmuebles": inmuebles,
+    };
+
+    setState(() {
+      cargando = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final data = compraEjemplo;
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Detalle de Compra'),
-        backgroundColor: Colors.deepPurple,
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _buildSectionTitle("Resumen General"),
-          _buildInfoRow("¿Embalaje?", data["embalaje"] ? "Sí" : "No"),
-          _buildInfoRow("Tipo de viaje ID", data["tipo_viaje_id"].toString()),
-          _buildInfoRow("Tipo residencia ID", data["tipo_residencia_id"].toString()),
-          _buildInfoRow("Fecha reserva", data["fecha_reserva"]),
-          _buildInfoRow("Distancia (km)", data["distancia"].toString()),
-          _buildInfoRow("Vehículo ID", data["vehiculo_id"].toString()),
-
-          const SizedBox(height: 16),
-          _buildSectionTitle("Ubicaciones"),
-          _buildInfoRow("Origen", data["origen"]["str"]),
-          _buildInfoRow("Destino", data["destino"]["str"]),
-
-          const SizedBox(height: 16),
-          _buildSectionTitle("Muebles y Formularios"),
-          ...data["inmuebles"].asMap().entries.map((entry) {
-            final index = entry.key;
-            final mueble = entry.value;
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "🪑 Mueble ID ${mueble['id']} (x${mueble['cantidad']})",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                ...mueble["formularios"].asMap().entries.map((form) {
-                  final i = form.key + 1;
-                  final f = form.value;
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: Text("🔸 Formulario $i: "
-                        "L: ${f["largo"]}, A: ${f["ancho"]}, "
-                        "Alt: ${f["alto"]}, P: ${f["peso"]}"),
-                  );
-                }).toList(),
-                const Divider(),
-              ],
-            );
-          }).toList(),
-        ],
-      ),
+      appBar: AppBar(title: Text("Detalle de Compra")),
+      body: cargando
+          ? Center(child: CircularProgressIndicator())
+          : datos == null
+              ? Center(child: Text("No hay datos disponibles 😥"))
+              : _buildContenido(),
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildContenido() {
+    final vehiculo = datos!["vehiculo"];
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _buildSection("Resumen General"),
+        _info("¿Embalaje?", datos!["embalaje"] ? "Sí" : "No"),
+        _info("Tipo de Viaje", datos!["tipo_viaje"]),
+        _info("Tipo de Residencia", datos!["residencia"]),
+        _info("Fecha Reserva", datos!["fecha_reserva"]),
+
+        const SizedBox(height: 16),
+        _buildSection("Ubicaciones"),
+        _info("Origen", datos!["origen"]),
+        _info("Destino", datos!["destino"]),
+
+        const SizedBox(height: 16),
+        _buildSection("Vehículo Seleccionado"),
+        _info("Nombre", vehiculo["nombre"]),
+        _info("Tipo", vehiculo["tipo_vehiculo"]["nombre"]),
+        _info("Placa", vehiculo["placa"]),
+        _info("Costo x Km", "Bs. ${vehiculo["coste_kilometraje"]}"),
+
+        const SizedBox(height: 16),
+        _buildSection("Muebles y Formularios"),
+        ...datos!["inmuebles"].map<Widget>((mueble) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("🪑 ${mueble['id']} (x${mueble['cantidad']})", style: TextStyle(fontWeight: FontWeight.bold)),
+              ...mueble["formularios"].asMap().entries.map<Widget>((entry) {
+                final i = entry.key + 1;
+                final f = entry.value;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: Text(
+                    "🔸 Formulario $i: L: ${f['largo']}, A: ${f['ancho']}, Alt: ${f['alto']}, P: ${f['peso']}",
+                  ),
+                );
+              }).toList(),
+              Divider(),
+            ],
+          );
+        }).toList(),
+
+        const SizedBox(height: 20),
+        ElevatedButton.icon(
+          icon: Icon(Icons.check_circle_outline),
+          label: Text("Pagar y Mostrar JSON"),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.green,
+            padding: EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          ),
+          onPressed: () {
+            final jsonCompleto = jsonEncode(datos);
+            print("🧾 JSON COMPLETO:\n$jsonCompleto");
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("✅ JSON impreso en consola")),
+            );
+          },
+        )
+      ],
+    );
+  }
+
+  Widget _info(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: TextStyle(color: Colors.black54)),
-          Text(value, style: TextStyle(fontWeight: FontWeight.bold)),
+          Expanded(
+            child: Text(value, textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildSectionTitle(String text) {
+  Widget _buildSection(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Text(
-        text,
-        style: TextStyle(fontSize: 18, color: Colors.orangeAccent, fontWeight: FontWeight.bold),
+        title,
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.orangeAccent),
       ),
     );
   }

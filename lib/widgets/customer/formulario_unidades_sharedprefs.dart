@@ -20,7 +20,6 @@ class _FormularioUnidadesScreenState extends State<FormularioUnidadesScreen> {
   late PageController _pageController;
   late List<GlobalKey<FormState>> _formKeys;
   late List<Map<String, String>> _datosUnidades;
-  int _paginaActual = 0;
 
   @override
   void initState() {
@@ -40,16 +39,16 @@ class _FormularioUnidadesScreenState extends State<FormularioUnidadesScreen> {
   Future<void> _cargarDatosGuardados() async {
     final prefs = await SharedPreferences.getInstance();
     final key = 'medidas_${widget.titulo}';
-    if (prefs.containsKey(key)) {
-      final jsonString = prefs.getString(key);
-      if (jsonString != null) {
+    final jsonString = prefs.getString(key);
+    if (jsonString != null) {
+      try {
         final List<dynamic> data = jsonDecode(jsonString);
         setState(() {
-          _datosUnidades = data
-              .map((e) => Map<String, String>.from(e as Map))
-              .toList();
+          for (int i = 0; i < widget.cantidad && i < data.length; i++) {
+            _datosUnidades[i] = Map<String, String>.from(data[i]);
+          }
         });
-      }
+      } catch (_) {}
     }
   }
 
@@ -58,18 +57,6 @@ class _FormularioUnidadesScreenState extends State<FormularioUnidadesScreen> {
     final key = 'medidas_${widget.titulo}';
     final jsonString = jsonEncode(_datosUnidades);
     await prefs.setString(key, jsonString);
-  }
-
-  void _irPagina(int index) {
-    _pageController.animateToPage(
-      index,
-      duration: Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-  }
-
-  bool _validarTodo() {
-    return _formKeys.every((key) => key.currentState?.validate() ?? false);
   }
 
   @override
@@ -120,13 +107,16 @@ class _FormularioUnidadesScreenState extends State<FormularioUnidadesScreen> {
                                     _irPagina(index + 1);
                                   } else {
                                     await _guardarDatos();
-                                    Navigator.pushReplacementNamed(
-                                        context, '/catalogo-vehiculos');
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(SnackBar(
-                                      content: Text(
-                                          "✅ Medidas guardadas correctamente"),
-                                    ));
+                                    Navigator.pushNamedAndRemoveUntil(
+                                      context,
+                                      '/catalogo-vehiculos',
+                                      (route) => false,
+                                    );
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text("✅ Medidas guardadas correctamente"),
+                                      ),
+                                    );
                                   }
                                 }
                               },
@@ -159,12 +149,22 @@ class _FormularioUnidadesScreenState extends State<FormularioUnidadesScreen> {
     );
   }
 
+  void _irPagina(int index) {
+    if (index >= 0 && index < widget.cantidad) {
+      _pageController.animateToPage(
+        index,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
   Widget _buildInput(int index, String label) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: TextFormField(
         initialValue: _datosUnidades[index][label.toLowerCase()],
-        keyboardType: TextInputType.number,
+        keyboardType: TextInputType.numberWithOptions(decimal: true),
         decoration: InputDecoration(
           labelText: label,
           prefixIcon: Icon(Icons.straighten),

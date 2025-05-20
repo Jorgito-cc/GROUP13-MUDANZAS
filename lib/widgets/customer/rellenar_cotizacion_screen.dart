@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+
 import 'formulario_unidades_sharedprefs.dart';
 
 class RellenarCotizacionScreen extends StatefulWidget {
   @override
-  _RellenarCotizacionScreenState createState() => _RellenarCotizacionScreenState();
+  _RellenarCotizacionScreenState createState() =>
+      _RellenarCotizacionScreenState();
 }
 
 class _RellenarCotizacionScreenState extends State<RellenarCotizacionScreen> {
@@ -13,6 +17,39 @@ class _RellenarCotizacionScreenState extends State<RellenarCotizacionScreen> {
     {"nombre": "Colchón", "cantidad": 0},
     {"nombre": "Sofá", "cantidad": 0},
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarDatosGuardados();
+  }
+
+  Future<void> _cargarDatosGuardados() async {
+    final prefs = await SharedPreferences.getInstance();
+    final data = prefs.getString("muebles");
+    if (data != null) {
+      final lista = List<Map<String, dynamic>>.from(jsonDecode(data));
+      setState(() {
+        for (var item in muebles) {
+          final encontrado = lista.firstWhere(
+              (e) => e['nombre'] == item['nombre'],
+              orElse: () => {});
+          if (encontrado.isNotEmpty) {
+            item['cantidad'] = encontrado['cantidad'];
+          }
+        }
+      });
+    }
+  }
+
+  Future<void> _guardarDatos() async {
+    final prefs = await SharedPreferences.getInstance();
+    final seleccionados = muebles
+        .where((element) => element['cantidad'] > 0)
+        .map((e) => {"nombre": e['nombre'], "cantidad": e['cantidad']})
+        .toList();
+    await prefs.setString("muebles", jsonEncode(seleccionados));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,8 +73,6 @@ class _RellenarCotizacionScreenState extends State<RellenarCotizacionScreen> {
               ],
             ),
           ),
-
-          // 🔘 Botón Siguiente
           Padding(
             padding: const EdgeInsets.all(16),
             child: ElevatedButton.icon(
@@ -98,67 +133,71 @@ class _RellenarCotizacionScreenState extends State<RellenarCotizacionScreen> {
     showDialog(
       context: context,
       builder: (_) {
-        return AlertDialog(
-          title: Text("Configurar ${item['nombre']}"),
-          content: Row(
-            children: [
-              Text("Cantidad: "),
-              const SizedBox(width: 10),
-              DropdownButton<int>(
-                value: cantidadTemp,
-                items: List.generate(6, (index) {
-                  return DropdownMenuItem(
-                    value: index,
-                    child: Text(index.toString()),
-                  );
-                }),
-                onChanged: (value) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) => AlertDialog(
+            title: Text("Configurar ${item['nombre']}"),
+            content: Row(
+              children: [
+                Text("Cantidad: "),
+                const SizedBox(width: 10),
+                DropdownButton<int>(
+                  value: cantidadTemp,
+                  items: List.generate(6, (index) {
+                    return DropdownMenuItem(
+                      value: index,
+                      child: Text(index.toString()),
+                    );
+                  }),
+                  onChanged: (value) {
+                    setStateDialog(() {
+                      cantidadTemp = value!;
+                    });
+                  },
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text("Cancelar"),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  if (cantidadTemp == 0) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text("Debe elegir una cantidad > 0")),
+                    );
+                    return;
+                  }
+
                   setState(() {
-                    cantidadTemp = value!;
+                    item['cantidad'] = cantidadTemp;
                   });
+
+                  Navigator.pop(context);
+                  await _guardarDatos();
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => FormularioUnidadesScreen(
+                        titulo: item['nombre'],
+                        cantidad: cantidadTemp,
+                      ),
+                    ),
+                  );
                 },
+                child: Text("Aceptar"),
               ),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text("Cancelar"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (cantidadTemp == 0) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Debe elegir una cantidad > 0")),
-                  );
-                  return;
-                }
-
-                setState(() {
-                  item['cantidad'] = cantidadTemp;
-                });
-
-                Navigator.pop(context);
-
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => FormularioUnidadesScreen(
-                      titulo: item['nombre'],
-                      cantidad: cantidadTemp,
-                    ),
-                  ),
-                );
-              },
-              child: Text("Aceptar"),
-            ),
-          ],
         );
       },
     );
   }
 
-  void _irASiguiente() {
+  void _irASiguiente() async {
     final seleccionados = muebles.where((m) => m['cantidad'] > 0).toList();
 
     if (seleccionados.isEmpty) {
@@ -168,7 +207,7 @@ class _RellenarCotizacionScreenState extends State<RellenarCotizacionScreen> {
       return;
     }
 
-    // 🔁 Aquí se puede guardar en memoria o pasar como argumento
-    Navigator.pushNamed(context, '/cotizacion-final'); // Cambia esta ruta según necesites
+    await _guardarDatos();
+    Navigator.pushNamed(context, '/catalogo-vehiculos');
   }
 }
