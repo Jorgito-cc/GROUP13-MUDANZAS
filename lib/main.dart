@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tienda_ecommerce/screens/customer/ResumenVehiculoScreen.dart';
+import 'package:tienda_ecommerce/screens/customer/detalle_compra_screen.dart';
 import 'package:tienda_ecommerce/screens/customer/vehiculo_catalogo_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
@@ -67,7 +69,11 @@ class MudanzasGoApp extends StatelessWidget {
             '/cotizacion-servicio':(_) =>CotizacionScreen (),
             '/rellenar-cotizacion':(_)=>RellenarCotizacionScreen(),
             '/payment': (_) => PaymentScreen(),
-            '/catalogo-vehiculos': (_) => VehiculoCatalogoScreen()
+            '/catalogo-vehiculos': (_) => VehiculoCatalogoScreen(),
+            '/resumen-vehiculo': (_) => ResumenVehiculoScreen(),
+            '/detalle-compra': (_) => DetalleCompraScreen(),
+
+
           },
         );
       },

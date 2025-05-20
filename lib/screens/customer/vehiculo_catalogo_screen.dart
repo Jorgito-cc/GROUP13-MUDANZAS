@@ -1,6 +1,7 @@
+// ... (importaciones existentes)
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import '../../data/vehiculo_info.dart'; // Asegúrate de tener esta fuente de datos
+import '../../data/vehiculo_info.dart';
 
 class VehiculoCatalogoScreen extends StatefulWidget {
   @override
@@ -143,6 +144,27 @@ class _VehiculoCatalogoScreenState extends State<VehiculoCatalogoScreen> {
                                         ? "Disponible"
                                         : "No Disponible",
                                     style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                ElevatedButton.icon(
+                                  onPressed: vehicle["estado"] == 1
+                                      ? () => Navigator.pushNamed(
+                                            context,
+                                            /* ------------------------------------------------------------------------------------------------------------------ */
+                                            '/resumen-vehiculo',
+                                            arguments: vehicle,
+                                          )
+                                      : null,
+                                  icon: Icon(Icons.local_shipping),
+                                  label: Text("Solicitar Mudanza"),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.orangeAccent,
+                                    disabledBackgroundColor: Colors.grey,
+                                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
                                   ),
                                 ),
                               ],
