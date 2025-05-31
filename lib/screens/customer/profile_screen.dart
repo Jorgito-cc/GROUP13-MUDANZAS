@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tienda_ecommerce/data/stripe/btn_test_service.dart';
 import '../../providers/auth_provider.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -79,6 +80,25 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   textStyle: const TextStyle(fontSize: 18),
                 ),
+              ),
+              
+              //boton para simular la pasarela de pago
+              const SizedBox(height: 16),
+              // Botón Stripe
+              BotonStripePago(
+                texto: "PAGAR AHORA",
+                onSuccess: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('✅ Pago completado correctamente'),
+                    ),
+                  );
+                },
+                onCancel: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('❌ Pago cancelado o fallido')),
+                  );
+                },
               ),
             ],
           ),

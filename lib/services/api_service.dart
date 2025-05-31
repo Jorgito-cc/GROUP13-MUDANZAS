@@ -3,5 +3,5 @@ class ApiService {
   //     'https://backendsi2mudanza-production.up.railway.app/api';
 
   static const String baseUrl =
-      'http://192.168.100.4:3000/api';
+      'http://192.168.146.220:3000/api';
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:provider/provider.dart';
+import 'package:tienda_ecommerce/core/constants.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'screens/customer/home_screen.dart';
@@ -29,7 +31,10 @@ import 'screens/customer/vehicle_info_screen.dart';
 import 'screens/customer/solicitar_servicio_screen.dart';
 import 'screens/customer/payment_screen.dart';
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  Stripe.publishableKey = AppConstants.stripePublishableKey;
+
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => AuthProvider()),
