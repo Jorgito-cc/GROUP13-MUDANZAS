@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:provider/provider.dart';
+import 'package:tienda_ecommerce/core/constants.dart';
 import 'package:tienda_ecommerce/screens/customer/ResumenVehiculoScreen.dart';
 import 'package:tienda_ecommerce/screens/customer/detalle_compra_screen.dart';
 import 'package:tienda_ecommerce/screens/customer/vehiculo_catalogo_screen.dart';
@@ -29,7 +31,10 @@ import './widgets/customer/cotizacion_screen.dart';
 import './widgets/customer/rellenar_cotizacion_screen.dart';
 
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  Stripe.publishableKey = AppConstants.stripePublishableKey;
+
   runApp(
     MultiProvider(
       providers: [ChangeNotifierProvider(create: (_) => AuthProvider())],
